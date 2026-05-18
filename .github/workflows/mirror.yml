@@ -1,13 +1,13 @@
 name: StoneAnalysis CI & Mirror
 
-if: github.repository == 'TeddyBertrand/Stone-Analysis'
-
 # Triggers: the pipeline runs on every push or pull request to the main branch
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
+
+if: ${{ github.repository == 'TeddyBertrand/Stone-Analysis' }}
 
 jobs:
 
