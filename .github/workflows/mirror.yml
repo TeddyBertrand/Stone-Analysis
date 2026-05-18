@@ -54,13 +54,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 2. Démarre un agent SSH en arrière-plan et charge ta clé privée 'SSH_KEY'
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      # 3. Enregistre l'empreinte de github.com et pousse le code sur le repo principal
       - name: Push to Epitech
         run: |
           # Crée le dossier SSH s'il n'existe pas et fait confiance au serveur github.com
@@ -68,8 +66,7 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           
           # Ajoute le dépôt Epitech en tant que "remote" temporaire nommé 'epitech'
-          # (Pense à remplacer l'URL ci-dessous par l'URL exacte de ton projet actuel si nécessaire)
-          git remote add epitech git@github.com:EpitechPGE2-2025/G-OOP-400-MPL-4-1-raytracer-2.git
+          git remote add epitech git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
           
           # Force le push de ta branche main locale vers le main du dépôt d'Epitech
           git push epitech main --force
