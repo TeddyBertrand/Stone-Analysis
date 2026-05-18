@@ -1,6 +1,6 @@
 name: StoneAnalysis CI & Mirror
 
-# Déclencheurs : le pipeline s'exécute à chaque push ou Pull Request sur la branche main
+# Triggers: the pipeline runs on every push or pull request to the main branch
 on:
   push:
     branches: [ "main" ]
@@ -8,65 +8,98 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # --- PREMIER JOB : Compiler, formater et tester le projet Rust ---
-  build_and_test:
+  # --- JOB 1: CHECK CODE FORMATTING ---
+  fmt:
     runs-on: ubuntu-latest
     steps:
-      # 1. Récupère le code source du dépôt miroir (ton GitHub personnel)
+      # 1. Fetch the source code from your mirror repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Installe la Toolchain Rust (rustc, cargo, clippy, rustfmt) en version stable
+      # 2. Install the stable Rust toolchain (rustc, cargo, rustfmt)
       - name: Setup Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      # 3. Optimise le temps de build en mettant en cache le dossier 'target/' et les dépendances Cargo
+      # 3. Optimize build times by caching Cargo dependencies
       - name: Rust Cache
         uses: swatinem/rust-cache@v2
 
-      # 4. Vérifie si le code respecte les normes de formatage officielles de Rust (rustfmt)
-      # Si le code est mal indenté, le pipeline s'arrête ici
+      # 4. Check if the code complies with official Rust formatting standards
+      # If the code is improperly formatted, this job fails
       - name: Check Formatting
         run: cargo fmt --check
 
-      # 5. Lance le Linter (Clippy) pour analyser le code et traquer les mauvaises pratiques
-      # Le drapeau '-D warnings' transforme les avertissements en erreurs pour bloquer le pipeline si le code est "sale"
+  # --- JOB 2: STATIC ANALYSIS (LINTER) ---
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Fetch the source code from your mirror repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Install the stable Rust toolchain (including clippy)
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # 3. Optimize build times by caching Cargo dependencies
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+
+      # 4. Run Clippy linter to catch common mistakes and enforce best practices
+      # The '-D warnings' flag turns all warnings into errors to block the pipeline if code is "dirty"
       - name: Run Clippy (Linter)
         run: cargo clippy -- -D warnings
 
-      # 6. Exécute tous les tests unitaires et d'intégration du projet
+  # --- JOB 3: COMPILATION & UNIT TESTS ---
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Fetch the source code from your mirror repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Install the stable Rust toolchain
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # 3. Optimize build times by caching Cargo dependencies and the target/ folder
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+
+      # 4. Execute all unit and integration tests
       - name: Run Tests
         run: cargo test --verbose
 
-
-  # --- SECOND JOB : Propager le code validé sur le dépôt principal d'Epitech ---
+  # --- JOB 4: PUSH VALIDATED CODE TO THE PRINCIPAL EPITECH REPOSITORY ---
   mirror_to_epitech:
     runs-on: ubuntu-latest
-    # SÉCURITÉ : Ce job ne se lance QUE si le job 'build_and_test' a réussi (0 erreur)
-    needs: build_and_test
-    # SÉCURITÉ : On ne push sur le repo Epitech QUE s'il s'agit d'un vrai push sur main (pas une Pull Request)
+    # SECURITY: This job ONLY runs if fmt, clippy, and test jobs all succeeded (0 errors)
+    needs: [fmt, clippy, test]
+    # SECURITY: Only mirror the code on actual pushes to main (ignores pull requests)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-      # 1. Récupère l'intégralité de l'historique Git (obligatoire pour un push miroir propre)
+      # 1. Fetch the full Git history (required for a clean mirror push)
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Start SSH agent in the background and load your private key 'SSH_KEY'
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      # 3. Register github.com host fingerprint and push the code
       - name: Push to Epitech
         run: |
-          # Crée le dossier SSH s'il n'existe pas et fait confiance au serveur github.com
+          # Create the SSH folder if it doesn't exist and trust github.com
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           
-          # Ajoute le dépôt Epitech en tant que "remote" temporaire nommé 'epitech'
+          # Add the principal Epitech repository as a temporary remote named 'epitech'
           git remote add epitech git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
           
-          # Force le push de ta branche main locale vers le main du dépôt d'Epitech
+          # Force push your local main branch to Epitech's main branch
           git push epitech main --force
