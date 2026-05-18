@@ -1,0 +1,75 @@
+name: StoneAnalysis CI & Mirror
+
+# Déclencheurs : le pipeline s'exécute à chaque push ou Pull Request sur la branche main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # --- PREMIER JOB : Compiler, formater et tester le projet Rust ---
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Récupère le code source du dépôt miroir (ton GitHub personnel)
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Installe la Toolchain Rust (rustc, cargo, clippy, rustfmt) en version stable
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # 3. Optimise le temps de build en mettant en cache le dossier 'target/' et les dépendances Cargo
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+
+      # 4. Vérifie si le code respecte les normes de formatage officielles de Rust (rustfmt)
+      # Si le code est mal indenté, le pipeline s'arrête ici
+      - name: Check Formatting
+        run: cargo fmt --check
+
+      # 5. Lance le Linter (Clippy) pour analyser le code et traquer les mauvaises pratiques
+      # Le drapeau '-D warnings' transforme les avertissements en erreurs pour bloquer le pipeline si le code est "sale"
+      - name: Run Clippy (Linter)
+        run: cargo clippy -- -D warnings
+
+      # 6. Exécute tous les tests unitaires et d'intégration du projet
+      - name: Run Tests
+        run: cargo test --verbose
+
+
+  # --- SECOND JOB : Propager le code validé sur le dépôt principal d'Epitech ---
+  mirror_to_epitech:
+    runs-on: ubuntu-latest
+    # SÉCURITÉ : Ce job ne se lance QUE si le job 'build_and_test' a réussi (0 erreur)
+    needs: build_and_test
+    # SÉCURITÉ : On ne push sur le repo Epitech QUE s'il s'agit d'un vrai push sur main (pas une Pull Request)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      # 1. Récupère l'intégralité de l'historique Git (obligatoire pour un push miroir propre)
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Démarre un agent SSH en arrière-plan et charge ta clé privée 'SSH_KEY'
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      # 3. Enregistre l'empreinte de github.com et pousse le code sur le repo principal
+      - name: Push to Epitech
+        run: |
+          # Crée le dossier SSH s'il n'existe pas et fait confiance au serveur github.com
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          
+          # Ajoute le dépôt Epitech en tant que "remote" temporaire nommé 'epitech'
+          # (Pense à remplacer l'URL ci-dessous par l'URL exacte de ton projet actuel si nécessaire)
+          git remote add epitech git@github.com:EpitechPGE2-2025/G-OOP-400-MPL-4-1-raytracer-2.git
+          
+          # Force le push de ta branche main locale vers le main du dépôt d'Epitech
+          git push epitech main --force
