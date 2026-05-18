@@ -13,7 +13,6 @@ jobs:
   check-source-branch:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    if: ${{ github.repository == 'TeddyBertrand/Stone-Analysis' }}
     steps:
       - name: Vérifie que la source est bien 'dev'
         run: |
@@ -27,7 +26,6 @@ jobs:
   # --- JOB 1: CHECK CODE FORMATTING ---
   fmt:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'TeddyBertrand/Stone-Analysis' }}
     steps:
       # 1. Fetch the source code from your mirror repository
       - name: Checkout Repository
@@ -49,7 +47,6 @@ jobs:
   # --- JOB 2: STATIC ANALYSIS (LINTER) ---
   clippy:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'TeddyBertrand/Stone-Analysis' }}
     steps:
       # 1. Fetch the source code from your mirror repository
       - name: Checkout Repository
@@ -71,7 +68,6 @@ jobs:
   # --- JOB 3: COMPILATION & UNIT TESTS ---
   test:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'TeddyBertrand/Stone-Analysis' }}
     steps:
       # 1. Fetch the source code from your mirror repository
       - name: Checkout Repository
@@ -92,7 +88,6 @@ jobs:
   # --- JOB 4: PUSH VALIDATED CODE TO THE PRINCIPAL EPITECH REPOSITORY ---
   mirror_to_epitech:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'TeddyBertrand/Stone-Analysis' }}
     # SECURITY: This job ONLY runs if fmt, clippy, and test jobs all succeeded (0 errors)
     needs: [fmt, clippy, test]
     # SECURITY: Only mirror the code on actual pushes to main (ignores pull requests)
