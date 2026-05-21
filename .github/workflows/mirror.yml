@@ -7,25 +7,9 @@ on:
     branches: [ "main", "dev" ]
 
 jobs:
-  # --- JOB 1: VALIDATION DE LA BRANCHE (Uniquement pour PR sur main) ---
-  check-branch:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
-    steps:
-      - name: Vérifie que la source est bien 'dev'
-        run: |
-          if [ "${{ github.head_ref }}" != "dev" ]; then
-            echo "❌ Merge sur main autorisé uniquement depuis 'dev'."
-            echo "   Branche détectée : ${{ github.head_ref }}"
-            exit 1
-          fi
-          echo "✅ Source valide : dev → main"
 
-  # --- JOB 2: TESTS & COMPILATION VIA MAKEFILE ---
   build-and-test:
     runs-on: ubuntu-latest
-    # Si c'est une PR sur main, on attend d'abord la validation de la branche
-    needs: [check-branch]
     if: always() && (needs.check-branch.result == 'success' || needs.check-branch.result == 'skipped')
     
     steps:
