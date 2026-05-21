@@ -37,7 +37,6 @@ jobs:
         with:
           components: rustfmt, clippy
 
-       Richmond:
       - name: Rust Cache
         uses: swatinem/rust-cache@v2
 
