@@ -1,0 +1,7 @@
+# ./crates/stego/Cargo.toml
+[package]
+name = "stego"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
