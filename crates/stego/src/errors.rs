@@ -11,8 +11,15 @@ pub enum StegoError {
 impl fmt::Display for StegoError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            StegoError::PayloadTooLarge { max_bytes, requested } => {
-                write!(f, "Le message est trop grand pour ce WAV (Max: {} octets, Demandé: {})", max_bytes, requested)
+            StegoError::PayloadTooLarge {
+                max_bytes,
+                requested,
+            } => {
+                write!(
+                    f,
+                    "Le message est trop grand pour ce WAV (Max: {} octets, Demandé: {})",
+                    max_bytes, requested
+                )
             }
             StegoError::NoPayloadFound => write!(f, "Aucun message caché détecté dans ce fichier"),
             StegoError::CorruptedMagicBytes => write!(f, "Signature de stéganographie invalide"),

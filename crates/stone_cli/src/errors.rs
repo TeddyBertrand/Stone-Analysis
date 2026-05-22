@@ -10,7 +10,9 @@ impl fmt::Display for CliError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CliError::BadArgument(arg) => write!(f, "Argument invalide : {}", arg),
-            CliError::MissingRequiredOption(opt) => write!(f, "Option manquante obligatoire : {}", opt),
+            CliError::MissingRequiredOption(opt) => {
+                write!(f, "Option manquante obligatoire : {}", opt)
+            }
         }
     }
 }

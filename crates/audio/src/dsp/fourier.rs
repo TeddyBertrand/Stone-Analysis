@@ -25,13 +25,16 @@ pub fn dft(samples: &[f32]) -> Vec<Complex> {
 
         for n_idx in 0..n {
             let angle = (2.0 * PI * (k as f32) * (n_idx as f32)) / (n as f32);
-            
+
             sum_re += samples[n_idx] * angle.cos();
             sum_im -= samples[n_idx] * angle.sin();
         }
 
-        spectrum[k] = Complex { re: sum_re, im: sum_im };
+        spectrum[k] = Complex {
+            re: sum_re,
+            im: sum_im,
+        };
     }
 
-    return spectrum
+    return spectrum;
 }

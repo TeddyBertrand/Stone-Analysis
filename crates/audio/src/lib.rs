@@ -1,7 +1,7 @@
+pub mod dsp;
 pub mod errors;
 pub mod wav;
-pub mod dsp;
 
-pub use errors::AudioError;
 pub use dsp::analysis::run;
+pub use errors::AudioError;
 pub type Result<T> = std::result::Result<T, AudioError>;

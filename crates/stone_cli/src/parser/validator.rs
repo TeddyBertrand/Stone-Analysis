@@ -1,5 +1,5 @@
-use crate::errors::CliError;
 use super::mode::{Mode, ARG_DEFS};
+use crate::errors::CliError;
 use std::collections::HashMap;
 
 pub fn resolve_mode(flags: &HashMap<&'static str, String>) -> Result<Mode, CliError> {
@@ -37,8 +37,5 @@ fn build_mode_list_error() -> String {
         .filter(|d| d.mode.is_some())
         .map(|d| d.long)
         .collect();
-    format!(
-        "Spécifie un mode : {}",
-        modes.join(", ")
-    )
+    format!("Spécifie un mode : {}", modes.join(", "))
 }

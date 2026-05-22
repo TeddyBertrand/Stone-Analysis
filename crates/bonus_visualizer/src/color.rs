@@ -3,10 +3,10 @@ pub struct Rgb(pub u8, pub u8, pub u8);
 
 pub fn heat_colormap(t: f32) -> Rgb {
     const STOPS: &[(f32, Rgb)] = &[
-        (0.00, Rgb(  0,   0,   0)),
-        (0.25, Rgb(  0,   0, 180)),
-        (0.50, Rgb(  0, 200, 200)),
-        (0.75, Rgb(255, 220,   0)),
+        (0.00, Rgb(0, 0, 0)),
+        (0.25, Rgb(0, 0, 180)),
+        (0.50, Rgb(0, 200, 200)),
+        (0.75, Rgb(255, 220, 0)),
         (1.00, Rgb(255, 255, 255)),
     ];
 
@@ -16,7 +16,11 @@ pub fn heat_colormap(t: f32) -> Rgb {
         let (t1, c1) = STOPS[i + 1];
         if t <= t1 {
             let a = (t - t0) / (t1 - t0);
-            return Rgb(lerp(c0.0, c1.0, a), lerp(c0.1, c1.1, a), lerp(c0.2, c1.2, a));
+            return Rgb(
+                lerp(c0.0, c1.0, a),
+                lerp(c0.1, c1.1, a),
+                lerp(c0.2, c1.2, a),
+            );
         }
     }
     STOPS.last().unwrap().1

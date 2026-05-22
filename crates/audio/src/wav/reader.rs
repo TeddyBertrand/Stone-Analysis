@@ -1,7 +1,7 @@
+use super::header::WavHeader;
+use crate::errors::AudioError;
 use std::fs::File;
 use std::io::Read;
-use crate::errors::AudioError;
-use super::header::WavHeader;
 
 fn convert_to_samples(raw_data: &[u8]) -> Result<Vec<f32>, AudioError> {
     if raw_data.is_empty() {
@@ -28,7 +28,7 @@ fn load_file_buffer(path: &str) -> Result<Vec<u8>, AudioError> {
 
 pub fn read_samples(path: &str) -> Result<Vec<f32>, AudioError> {
     let buffer = load_file_buffer(path)?;
-    WavHeader::from_bytes(&buffer)?; 
+    WavHeader::from_bytes(&buffer)?;
     let samples = convert_to_samples(&buffer[44..])?;
     Ok(samples)
 }

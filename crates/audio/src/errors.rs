@@ -16,9 +16,15 @@ impl fmt::Display for AudioError {
         match self {
             AudioError::FileNotFound(path) => write!(f, "Fichier audio introuvable : {}", path),
             AudioError::InvalidWavHeader(msg) => write!(f, "Header WAV corrompu : {}", msg),
-            AudioError::UnsupportedSampleFormat(fmt) => write!(f, "Format d'échantillon non supporté : {}", fmt),
+            AudioError::UnsupportedSampleFormat(fmt) => {
+                write!(f, "Format d'échantillon non supporté : {}", fmt)
+            }
             AudioError::DftLengthMismatch { expected, got } => {
-                write!(f, "Taille DFT incorrecte (Attendu: {}, Obtenu: {})", expected, got)
+                write!(
+                    f,
+                    "Taille DFT incorrecte (Attendu: {}, Obtenu: {})",
+                    expected, got
+                )
             }
             AudioError::IoError(msg) => write!(f, "Erreur système d'E/S : {}", msg),
             AudioError::EmptySignal => write!(f, "Le signal audio fourni est vide"),

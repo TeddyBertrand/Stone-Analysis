@@ -5,7 +5,6 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-# Le CLI dépend des deux bibliothèques du workspace
 audio = { path = "../audio" }
 stego = { path = "../stego" }
 stone_cli = { path = "../stone_cli" }
