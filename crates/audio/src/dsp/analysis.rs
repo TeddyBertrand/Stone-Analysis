@@ -1,6 +1,6 @@
 use super::fourier::{dft, Complex};
-use crate::wav::read_samples;
 use crate::errors::AudioError;
+use crate::wav::read_samples;
 
 const SAMPLE_RATE: f32 = 48000.0;
 pub const CHUNK_SIZE: usize = 2048;
@@ -13,7 +13,7 @@ pub struct FrequencyResult {
 pub fn run(path: &str, n: usize) -> Result<(), AudioError> {
     let samples = read_samples(path)?;
     let top_frequencies = analyze_spectrogram(&samples, n)?;
-    
+
     print_results(&top_frequencies);
     Ok(())
 }
@@ -32,7 +32,7 @@ fn analyze_spectrogram(samples: &[f32], n: usize) -> Result<Vec<FrequencyResult>
 
     for chunk in samples.chunks_exact(CHUNK_SIZE) {
         let spectrum = dft(chunk);
-        
+
         for i in 0..half_size {
             accumulated_magnitudes[i] += spectrum[i].magnitude();
         }
@@ -46,7 +46,7 @@ fn analyze_spectrogram(samples: &[f32], n: usize) -> Result<Vec<FrequencyResult>
     let mut average_spectrum = Vec::with_capacity(half_size);
     for i in 0..half_size {
         let avg_mag = accumulated_magnitudes[i] / block_count as f32;
-        
+
         average_spectrum.push(Complex {
             re: avg_mag,
             im: 0.0,
@@ -66,7 +66,7 @@ pub fn find_top_n(spectrum: &[Complex], sample_rate: f32, n: usize) -> Vec<Frequ
 
         results.push(FrequencyResult { hz, magnitude: mag });
     }
-    
+
     results.sort_by(|a, b| b.magnitude.partial_cmp(&a.magnitude).unwrap());
     results.truncate(n);
 

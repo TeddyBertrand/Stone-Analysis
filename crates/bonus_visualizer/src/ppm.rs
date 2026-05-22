@@ -7,13 +7,17 @@ use std::io::{BufWriter, Write};
 
 pub struct PpmWriter {
     pub pixels: Vec<Rgb>,
-    pub width:  usize,
+    pub width: usize,
     pub height: usize,
 }
 
 impl PpmWriter {
     pub fn new(width: usize, height: usize, bg: Rgb) -> Self {
-        Self { pixels: vec![bg; width * height], width, height }
+        Self {
+            pixels: vec![bg; width * height],
+            width,
+            height,
+        }
     }
 
     #[inline]

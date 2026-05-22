@@ -28,13 +28,19 @@ impl std::error::Error for AppError {
 }
 
 impl From<audio::AudioError> for AppError {
-    fn from(err: audio::AudioError) -> Self { AppError::Audio(err) }
+    fn from(err: audio::AudioError) -> Self {
+        AppError::Audio(err)
+    }
 }
 
 impl From<stego::StegoError> for AppError {
-    fn from(err: stego::StegoError) -> Self { AppError::Stego(err) }
+    fn from(err: stego::StegoError) -> Self {
+        AppError::Stego(err)
+    }
 }
 
 impl From<stone_cli::CliError> for AppError {
-    fn from(err: stone_cli::CliError) -> Self { AppError::Cli(err) }
+    fn from(err: stone_cli::CliError) -> Self {
+        AppError::Cli(err)
+    }
 }

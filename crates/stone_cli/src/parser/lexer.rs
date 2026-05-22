@@ -1,5 +1,5 @@
-use crate::errors::CliError;
 use super::mode::{ArgDef, ArgKind, ARG_DEFS};
+use crate::errors::CliError;
 use std::collections::HashMap;
 
 pub struct LexResult {
@@ -10,7 +10,7 @@ pub struct LexResult {
 pub fn lex(raw: &[String]) -> Result<LexResult, CliError> {
     let mut flags = HashMap::new();
     let mut positionals = Vec::new();
-    
+
     let mut args_iter = raw.iter().peekable();
 
     while let Some(arg) = args_iter.next() {
@@ -30,8 +30,8 @@ where
     I: Iterator<Item = &'a String>,
 {
     let key = key_part(arg);
-    let def = find_def(key)
-        .ok_or_else(|| CliError::BadArgument(format!("Option inconnue : {arg}")))?;
+    let def =
+        find_def(key).ok_or_else(|| CliError::BadArgument(format!("Option inconnue : {arg}")))?;
 
     let value = match def.kind {
         ArgKind::Flag => "true".into(),
@@ -55,7 +55,9 @@ where
         }
     }
 
-    Err(CliError::MissingRequiredOption(format!("Valeur manquante pour {key}")))
+    Err(CliError::MissingRequiredOption(format!(
+        "Valeur manquante pour {key}"
+    )))
 }
 
 #[inline]

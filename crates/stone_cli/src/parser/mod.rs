@@ -1,14 +1,14 @@
 pub mod args;
+pub mod help;
 pub mod lexer;
 pub mod mode;
 pub mod validator;
-pub mod help;
 
-use crate::errors::CliError;
 use self::args::ParsedArgs;
+use self::help::print_help;
 use self::lexer::lex;
 use self::validator::{resolve_mode, validate_positionals};
-use self::help::print_help;
+use crate::errors::CliError;
 
 pub fn parse_args() -> Result<ParsedArgs, CliError> {
     let raw: Vec<String> = std::env::args().collect();
@@ -22,5 +22,9 @@ pub fn parse_args() -> Result<ParsedArgs, CliError> {
     let mode = resolve_mode(&lex_result.flags)?;
     validate_positionals(mode, &lex_result.positionals)?;
 
-    Ok(ParsedArgs { flags: lex_result.flags, positionals: lex_result.positionals, mode })
+    Ok(ParsedArgs {
+        flags: lex_result.flags,
+        positionals: lex_result.positionals,
+        mode,
+    })
 }
