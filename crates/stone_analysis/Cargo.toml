@@ -9,3 +9,4 @@ edition.workspace = true
 audio = { path = "../audio" }
 stego = { path = "../stego" }
 stone_cli = { path = "../stone_cli" }
+bonus_visualizer = { path = "../bonus_visualizer" }

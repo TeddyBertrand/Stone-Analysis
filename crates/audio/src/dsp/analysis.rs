@@ -3,7 +3,7 @@ use crate::wav::read_samples;
 use crate::errors::AudioError;
 
 const SAMPLE_RATE: f32 = 48000.0;
-const CHUNK_SIZE: usize = 2048;
+pub const CHUNK_SIZE: usize = 2048;
 
 pub struct FrequencyResult {
     pub hz: f32,

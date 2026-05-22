@@ -1,5 +1,3 @@
-// src/main.rs
-
 mod errors;
 
 fn main() {
@@ -24,6 +22,10 @@ fn execute_action(action: stone_cli::Action) -> Result<(), errors::AppError> {
             stone_cli::print_help();
             Ok(())
         }
+        stone_cli::Action::Visualize { file, mode, output } => {
+            bonus_visualizer::run(&file, &mode, &output)?;
+            Ok(())
+        },
     }
 }
 
