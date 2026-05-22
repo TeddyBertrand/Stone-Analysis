@@ -10,6 +10,7 @@ pub enum Mode {
     Cypher,
     Decypher,
     Help,
+    Visualize,
 }
 
 impl Mode {
@@ -19,6 +20,7 @@ impl Mode {
             Mode::Cypher   => 3,
             Mode::Decypher => 1,
             Mode::Help     => 0,
+            Mode::Visualize => 3,
         }
     }
 
@@ -28,6 +30,7 @@ impl Mode {
             Mode::Cypher   => "IN_FILE OUT_FILE MESSAGE",
             Mode::Decypher => "IN_FILE",
             Mode::Help     => "",
+            Mode::Visualize => "IN_FILE OUT_FILE MODE",
         }
     }
 }
@@ -45,4 +48,5 @@ pub const ARG_DEFS: &[ArgDef] = &[
     ArgDef { short: "-c", long: "--cypher",   kind: ArgKind::Flag,  mode: Some(Mode::Cypher),   help: "Chiffre un message dans une image (IN_FILE OUT_FILE MESSAGE)" },
     ArgDef { short: "-d", long: "--decypher", kind: ArgKind::Flag,  mode: Some(Mode::Decypher), help: "Déchiffre un message caché (IN_FILE)"                 },
     ArgDef { short: "-h", long: "--help",     kind: ArgKind::Flag,  mode: Some(Mode::Help),     help: "Affiche l'aide"          },
+    ArgDef { short: "-v", long: "--visualize", kind: ArgKind::Flag, mode: Some(Mode::Visualize), help: "Affiche un spectrogramme (IN_FILE OUT_FILE MODE), graphical ou ascii" },
 ];
