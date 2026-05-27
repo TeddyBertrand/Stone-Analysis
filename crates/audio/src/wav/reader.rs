@@ -3,6 +3,8 @@ use crate::errors::AudioError;
 use std::fs::File;
 use std::io::Read;
 
+use crate::SAMPLE_NORMALIZER;
+
 fn convert_to_samples(raw_data: &[u8]) -> Result<Vec<f32>, AudioError> {
     if raw_data.is_empty() {
         return Err(AudioError::EmptySignal);
@@ -13,7 +15,7 @@ fn convert_to_samples(raw_data: &[u8]) -> Result<Vec<f32>, AudioError> {
 
     for chunk in raw_data.chunks_exact(2) {
         let sample_i16 = i16::from_le_bytes([chunk[0], chunk[1]]);
-        samples.push(sample_i16 as f32 / 32768.0);
+        samples.push(sample_i16 as f32 / SAMPLE_NORMALIZER);
     }
 
     Ok(samples)

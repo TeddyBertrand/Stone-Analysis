@@ -1,3 +1,4 @@
+
 mod errors;
 
 fn main() {
@@ -15,11 +16,11 @@ fn execute_action(action: stone_cli::Action) -> Result<(), errors::AppError> {
             output,
             message,
         } => {
-            println!("[cypher]   input={input}  output={output}  message={message}");
+            stego::run_encryption(&input, &output, &message)?;
             Ok(())
         }
         stone_cli::Action::Decypher { input } => {
-            println!("[decypher] input={input}");
+            stego::run_decryption(&input)?;
             Ok(())
         }
         stone_cli::Action::Help {} => {
