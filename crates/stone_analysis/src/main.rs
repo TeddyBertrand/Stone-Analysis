@@ -4,7 +4,7 @@ mod errors;
 fn main() {
     if let Err(e) = run() {
         eprintln!("\x1b[31merr\x1b[0m {e}");
-        std::process::exit(1);
+        std::process::exit(84);
     }
 }
 
