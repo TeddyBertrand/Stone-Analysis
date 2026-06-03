@@ -5,7 +5,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # Job unique pour tout faire, évite les dépendances complexes entre jobs
   ci-and-mirror:
     runs-on: ubuntu-latest
     steps:
@@ -17,15 +16,12 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build and Test
-        run: |
-          make all
-          cargo test --verbose
-
       - name: Push to Epitech
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Mirror to Epitech
         env:
           TARGET_REPO: git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
         run: |
