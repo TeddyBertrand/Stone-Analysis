@@ -1,0 +1,11 @@
+# ./crates/stone_analysis/Cargo.toml
+[package]
+name = "stone_analysis"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+audio = { path = "../audio" }
+stego = { path = "../stego" }
+stone_cli = { path = "../stone_cli" }
+bonus_visualizer = { path = "../bonus_visualizer" }

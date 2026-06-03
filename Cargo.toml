@@ -1,6 +1,13 @@
-[package]
-name = "StoneAnalysis"
-version = "0.1.0"
-edition = "2024"
+# ./Cargo.toml
+[workspace]
+members = [
+    "crates/audio",
+    "crates/stego",
+    "crates/stone_analysis",  "crates/stone_cli",
+]
+resolver = "2"
 
-[dependencies]
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Teddy ", "Frederick"]
