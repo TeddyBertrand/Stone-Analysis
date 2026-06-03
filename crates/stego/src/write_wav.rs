@@ -13,7 +13,7 @@ pub fn write_to_wav(
     let data_size = (num_samples * 2) as u32;
     let riff_size = 36 + data_size;
 
-    let mut file = File::create(file_name)?;
+    let mut file = std::io::BufWriter::new(File::create(file_name)?);
     let mut clean_header_bytes = header.raw_bytes;
 
     clean_header_bytes[4..8].copy_from_slice(&riff_size.to_le_bytes());

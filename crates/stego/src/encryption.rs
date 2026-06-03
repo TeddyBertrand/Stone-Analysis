@@ -27,21 +27,23 @@ fn mask_message(
         });
     }
 
-    let mut steg_audio: Vec<f32> = Vec::new();
-    let mut window_idx = 0;
-
-    let mut fchunks_iter = normalized_samples.chunks(CHUNK_SIZE);
+    let mut steg_audio = Vec::with_capacity(normalized_samples.len());
     let total_req_win = msg_len + 1;
 
-    while window_idx < total_req_win || fchunks_iter.len() > 0 {
-        let mut window_samples = match fchunks_iter.next() {
-            Some(fchunk) => fchunk.to_vec(),
-            None => vec![0.0; CHUNK_SIZE],
+    for window_idx in 0..total_req_win {
+        let start_idx = window_idx * CHUNK_SIZE;
+        let end_idx = start_idx + CHUNK_SIZE;
+        
+        let window_samples = if start_idx < normalized_samples.len() {
+            let limit = std::cmp::min(end_idx, normalized_samples.len());
+            let mut chunk = normalized_samples[start_idx..limit].to_vec();
+            if chunk.len() < CHUNK_SIZE {
+                chunk.resize(CHUNK_SIZE, 0.0);
+            }
+            chunk
+        } else {
+            vec![0.0; CHUNK_SIZE]
         };
-
-        if window_samples.len() < CHUNK_SIZE {
-            window_samples.resize(CHUNK_SIZE, 0.0);
-        }
 
         let complex_window: Vec<Complex> = window_samples
             .iter()
@@ -62,7 +64,7 @@ fn mask_message(
                 inject_magni,
                 PHASE,
             )?;
-        } else if window_idx <= msg_len {
+        } else {
             let target_hz = mask_chars(given_msg, window_idx);
             modify_sound_spectrum(
                 &mut freq_samples,
@@ -81,11 +83,11 @@ fn mask_message(
             .collect();
 
         steg_audio.extend(processed_samples);
+    }
 
-        window_idx += 1;
-        if window_idx >= total_req_win && fchunks_iter.len() == 0 {
-            break;
-        }
+    let processed_bytes = total_req_win * CHUNK_SIZE;
+    if normalized_samples.len() > processed_bytes {
+        steg_audio.extend_from_slice(&normalized_samples[processed_bytes..]);
     }
 
     steg_audio.truncate(file_samples.len());

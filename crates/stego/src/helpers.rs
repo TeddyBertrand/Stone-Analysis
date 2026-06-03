@@ -6,9 +6,8 @@ use crate::{CHUNK_SIZE, MAX_HZ, OBS_KEY, SAMPLE_RATE};
 
 pub fn mask_chars(given_msg: &str, window_idx: usize) -> f64 {
     let bchar = given_msg.as_bytes()[window_idx - 1];
-    let uppercase_char = bchar.to_ascii_uppercase();
 
-    let mask_char = uppercase_char ^ (OBS_KEY ^ (window_idx as u8));
+    let mask_char = bchar ^ (OBS_KEY ^ (window_idx as u8));
     let target_hz = MAX_HZ + (mask_char as f64 * (SAMPLE_RATE / CHUNK_SIZE as f64));
 
     return target_hz;

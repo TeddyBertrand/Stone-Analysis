@@ -1,4 +1,4 @@
-use audio::dsp::fourier::{dft, Complex};
+use audio::dsp::fourier::{fft, Complex};
 
 use crate::errors::StegoError;
 use crate::helpers::normalize_samples;
@@ -73,8 +73,12 @@ fn unmask_message(file_samples: Vec<f32>) -> Result<(), StegoError> {
             break;
         }
 
-        let freq_samples = dft(&window_samples);
-
+        let complex_window: Vec<Complex> = window_samples
+            .iter()
+            .map(|&s| Complex { re: s, im: 0.0 })
+            .collect();
+        let freq_samples = fft(&complex_window);
+        
         if window_idx == 0 {
             exctract_header_len(&freq_samples, base_k, &mut msg_len);
         }
