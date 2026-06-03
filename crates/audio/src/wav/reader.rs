@@ -30,8 +30,19 @@ fn load_file_buffer(path: &str) -> Result<Vec<u8>, AudioError> {
 
 pub fn read_samples(path: &str) -> Result<Vec<f32>, AudioError> {
     let buffer = load_file_buffer(path)?;
-    WavHeader::from_bytes(&buffer)?;
-    let samples = convert_to_samples(&buffer[44..])?;
+    let header = WavHeader::from_bytes(&buffer)?;
+    if header.data_size % 2 != 0 {
+        return Err(AudioError::InvalidWavHeader(
+            "La taille des données WAV doit être un multiple de 2 pour le format 16-bit PCM."
+                .to_string(),
+        ));
+    }
+    if buffer.len() < 44 + header.data_size as usize {
+        return Err(AudioError::InvalidWavHeader(
+            "Le fichier WAV est incomplet ou corrompu.".to_string(),
+        ));
+    }
+    let samples = convert_to_samples(&buffer[44..44 + header.data_size as usize])?;
     Ok(samples)
 }
 

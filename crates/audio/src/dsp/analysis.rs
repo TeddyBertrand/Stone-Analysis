@@ -1,4 +1,4 @@
-use super::fourier::{dft, Complex};
+use super::fourier::{fft, Complex};
 use crate::errors::AudioError;
 use crate::wav::read_samples;
 
@@ -31,7 +31,10 @@ fn analyze_spectrogram(samples: &[f32], n: usize) -> Result<Vec<FrequencyResult>
     let mut block_count = 0;
 
     for chunk in samples.chunks_exact(CHUNK_SIZE) {
-        let spectrum = dft(chunk);
+        let complex_chunk: Vec<Complex> =
+            chunk.iter().map(|&s| Complex { re: s, im: 0.0 }).collect();
+
+        let spectrum = fft(&complex_chunk);
 
         for i in 0..half_size {
             accumulated_magnitudes[i] += spectrum[i].magnitude();
@@ -46,7 +49,6 @@ fn analyze_spectrogram(samples: &[f32], n: usize) -> Result<Vec<FrequencyResult>
     let mut average_spectrum = Vec::with_capacity(half_size);
     for i in 0..half_size {
         let avg_mag = accumulated_magnitudes[i] / block_count as f32;
-
         average_spectrum.push(Complex {
             re: avg_mag,
             im: 0.0,
