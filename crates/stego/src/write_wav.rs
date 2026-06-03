@@ -1,18 +1,14 @@
-
 use crate::errors::StegoError;
 use audio::wav::header::WavHeader;
 
 use std::fs::File;
 use std::io::Write;
 
-
-
-
-
-
-
-pub fn write_to_wav(recon_freq: &[f32], file_name: &str, header: &WavHeader) -> Result<(), StegoError>
-{
+pub fn write_to_wav(
+    recon_freq: &[f32],
+    file_name: &str,
+    header: &WavHeader,
+) -> Result<(), StegoError> {
     let num_samples = recon_freq.len();
     let data_size = (num_samples * 2) as u32;
     let riff_size = 36 + data_size;
@@ -31,6 +27,9 @@ pub fn write_to_wav(recon_freq: &[f32], file_name: &str, header: &WavHeader) -> 
         file.write_all(&int_sample.to_le_bytes())?;
     }
 
-    println!("Success! Created '{}' ({} samples).", file_name, num_samples);
+    println!(
+        "Success! Created '{}' ({} samples).",
+        file_name, num_samples
+    );
     Ok(())
 }

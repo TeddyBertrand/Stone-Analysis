@@ -33,7 +33,8 @@ pub fn read_samples(path: &str) -> Result<Vec<f32>, AudioError> {
     let header = WavHeader::from_bytes(&buffer)?;
     if header.data_size % 2 != 0 {
         return Err(AudioError::InvalidWavHeader(
-            "La taille des données WAV doit être un multiple de 2 pour le format 16-bit PCM.".to_string(),
+            "La taille des données WAV doit être un multiple de 2 pour le format 16-bit PCM."
+                .to_string(),
         ));
     }
     if buffer.len() < 44 + header.data_size as usize {

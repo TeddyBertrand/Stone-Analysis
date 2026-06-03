@@ -15,8 +15,7 @@ impl Complex {
     }
 }
 
-pub fn idft(freq_samples: &Vec<Complex>) -> Vec<f32> 
-{
+pub fn idft(freq_samples: &Vec<Complex>) -> Vec<f32> {
     let n = freq_samples.len();
     let mut reconstructed_freq: Vec<f32> = vec![0.0; n];
 
@@ -26,7 +25,8 @@ pub fn idft(freq_samples: &Vec<Complex>) -> Vec<f32>
         for n_idx in 0..n {
             let angle = (2.0 * PI * (k as f32) * (n_idx as f32)) / (n as f32);
 
-            sum_real += (freq_samples[n_idx].re * angle.cos()) - (freq_samples[n_idx].im * angle.sin());
+            sum_real +=
+                (freq_samples[n_idx].re * angle.cos()) - (freq_samples[n_idx].im * angle.sin());
         }
 
         reconstructed_freq[k] = sum_real / (n as f32);
@@ -83,7 +83,7 @@ pub fn fft(samples: &[Complex]) -> Vec<Complex> {
             re: angle.cos(),
             im: angle.sin(),
         };
-        
+
         // Complex multiplication: (a+bi)(c+di) = (ac-bd) + (ad+bc)i
         let t = Complex {
             re: twiddle.re * odd_fft[k].re - twiddle.im * odd_fft[k].im,
@@ -99,15 +99,18 @@ pub fn fft(samples: &[Complex]) -> Vec<Complex> {
             im: even_fft[k].im - t.im,
         };
     }
-    return combined
+    return combined;
 }
 
 pub fn ifft(freq_samples: &[Complex]) -> Vec<Complex> {
     let n = freq_samples.len();
-    
+
     let conjugated: Vec<Complex> = freq_samples
         .iter()
-        .map(|c| Complex { re: c.re, im: -c.im })
+        .map(|c| Complex {
+            re: c.re,
+            im: -c.im,
+        })
         .collect();
 
     let mut result = fft(&conjugated);
@@ -116,5 +119,5 @@ pub fn ifft(freq_samples: &[Complex]) -> Vec<Complex> {
         c.re /= n as f32;
         c.im /= -(n as f32);
     }
-    return result
+    return result;
 }

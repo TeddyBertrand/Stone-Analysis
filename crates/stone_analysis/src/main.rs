@@ -1,4 +1,3 @@
-
 mod errors;
 
 fn main() {

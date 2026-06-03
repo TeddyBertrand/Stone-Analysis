@@ -1,4 +1,3 @@
-
 pub const CHUNK_SIZE: usize = 2048;
 pub const SAMPLE_RATE: f64 = 48000.0;
 pub const PHASE: f32 = 0.0;
