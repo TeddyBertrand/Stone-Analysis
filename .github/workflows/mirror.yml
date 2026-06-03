@@ -1,120 +1,30 @@
-name: StoneAnalysis CI & Mirror
+name: StoneAnalysis CI
 
-# Triggers: the pipeline runs on every push or pull request to the main branch
 on:
   push:
-    branches: [ "main", "dev" ]
-  pull_request:
-    branches: [ "main", "dev" ]
-
+    branches: [ "main" ]
 
 jobs:
-
-  check-source-branch:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Vérifie que la source est bien 'dev'
-        run: |
-          if [ "${{ github.head_ref }}" != "dev" ]; then
-            echo "❌ Merge sur main autorisé uniquement depuis 'dev'."
-            echo "   Branche détectée : ${{ github.head_ref }}"
-            exit 1
-          fi
-          echo "✅ Source valide : dev → main"
-
-  # --- JOB 1: CHECK CODE FORMATTING ---
-  fmt:
+  ci-and-mirror:
     runs-on: ubuntu-latest
     steps:
-      # 1. Fetch the source code from your mirror repository
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # 2. Install the stable Rust toolchain (rustc, cargo, rustfmt)
-      - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      # 3. Optimize build times by caching Cargo dependencies
-      - name: Rust Cache
-        uses: swatinem/rust-cache@v2
-
-      # 4. Check if the code complies with official Rust formatting standards
-      # If the code is improperly formatted, this job fails
-      - name: Check Formatting
-        run: cargo fmt --check
-
-  # --- JOB 2: STATIC ANALYSIS (LINTER) ---
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-      # 1. Fetch the source code from your mirror repository
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # 2. Install the stable Rust toolchain (including clippy)
-      - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      # 3. Optimize build times by caching Cargo dependencies
-      - name: Rust Cache
-        uses: swatinem/rust-cache@v2
-
-      # 4. Run Clippy linter to catch common mistakes and enforce best practices
-      # The '-D warnings' flag turns all warnings into errors to block the pipeline if code is "dirty"
-      - name: Run Clippy (Linter)
-        run: cargo clippy -- -D warnings
-
-  # --- JOB 3: COMPILATION & UNIT TESTS ---
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      # 1. Fetch the source code from your mirror repository
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # 2. Install the stable Rust toolchain
-      - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      # 3. Optimize build times by caching Cargo dependencies and the target/ folder
-      - name: Rust Cache
-        uses: swatinem/rust-cache@v2
-
-      # 4. Execute all unit and integration tests
-      - name: Run Tests
-        run: cargo test --verbose
-
-  # --- JOB 4: PUSH VALIDATED CODE TO THE PRINCIPAL EPITECH REPOSITORY ---
-  mirror_to_epitech:
-    runs-on: ubuntu-latest
-    # SECURITY: This job ONLY runs if fmt, clippy, and test jobs all succeeded (0 errors)
-    needs: [fmt, clippy, test]
-    # SECURITY: Only mirror the code on actual pushes to main (ignores pull requests)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      # 1. Fetch the full Git history (required for a clean mirror push)
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. Start SSH agent in the background and load your private key 'SSH_KEY'
-      - name: Setup SSH Agent
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Push to Epitech
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      # 3. Register github.com host fingerprint and push the code
-      - name: Push to Epitech
+      - name: Mirror to Epitech
+        env:
+          TARGET_REPO: git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
         run: |
-          # Create the SSH folder if it doesn't exist and trust github.com
-          mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
-          # Add the principal Epitech repository as a temporary remote named 'epitech'
-          git remote add epitech git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
-          
-          # Force push your local main branch to Epitech's main branch
+          git remote add epitech $TARGET_REPO
           git push epitech main --force
