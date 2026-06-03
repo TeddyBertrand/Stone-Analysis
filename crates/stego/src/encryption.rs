@@ -12,8 +12,17 @@ fn mask_message(file_samples: &Vec<f32>, header: &WavHeader, output_file: &str, 
     let idft_scale_factor = dft_scaling_factor();
     let normalized_samples = normalize_samples(file_samples);
 
-    let mut steg_audio: Vec<f32> = Vec::new();
     let msg_len = given_msg.len();
+    let total_chunks = file_samples.len() / CHUNK_SIZE;
+    let max_bytes = total_chunks.saturating_sub(1);
+    if msg_len > max_bytes {
+        return Err(StegoError::PayloadTooLarge {
+            max_bytes,
+            requested: msg_len,
+        });
+    }
+
+    let mut steg_audio: Vec<f32> = Vec::new();
     let mut window_idx = 0;
 
     let mut fchunks_iter = normalized_samples.chunks(CHUNK_SIZE);
@@ -50,6 +59,8 @@ fn mask_message(file_samples: &Vec<f32>, header: &WavHeader, output_file: &str, 
         window_idx += 1;
         if window_idx >= total_req_win && fchunks_iter.len() == 0 { break; }
     }
+
+    steg_audio.truncate(file_samples.len());
 
     write_to_wav(&steg_audio, output_file, &header)?;
 
