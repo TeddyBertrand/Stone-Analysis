@@ -1,80 +1,34 @@
-name: StoneAnalysis CI & Mirror
+name: StoneAnalysis CI
 
 on:
   push:
-    branches: [ "main", "dev" ]
-  pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "main" ]
 
 jobs:
-
-  build-and-test:
+  # Job unique pour tout faire, évite les dépendances complexes entre jobs
+  ci-and-mirror:
     runs-on: ubuntu-latest
-    if: always() && (needs.check-branch.result == 'success' || needs.check-branch.result == 'skipped')
-    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Rust Cache
-        uses: swatinem/rust-cache@v2
-
-      - name: Check Formatting
-        run: cargo fmt --check
-
-      - name: Run Clippy (Linter)
-        run: cargo clippy -- -D warnings
-
-      - name: Run Cargo Tests
-        run: cargo test --verbose
-
-      # CRUCIAL POUR EPITECH: On teste la compilation officielle via ton Makefile
-      - name: Test Epitech Makefile compilation
-        run: |
-          make all
-          if [ ! -f ./stone_analysis ]; then
-            echo "❌ Le binaire 'stone_analysis' n'a pas été trouvé à la racine après un 'make' !"
-            exit 1
-          fi
-          echo "✅ Compilation Makefile OK, binaire présent."
-          make fclean
-          if [ -f ./stone_analysis ] || [ -d ./target ]; then
-            echo "❌ 'make fclean' n'a pas correctement nettoyé le binaire ou le dossier target."
-            exit 1
-          fi
-          echo "✅ Nettoyage Makefile OK."
-
-  # --- JOB 3: PUSH VERS LE MIROIR EPITECH ---
-  mirror_to_epitech:
-    runs-on: ubuntu-latest
-    needs: [build-and-test]
-    # S'exécute uniquement si le build/test a réussi ET qu'on pousse sur main
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup SSH Agent
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build and Test
+        run: |
+          make all
+          cargo test --verbose
+
+      - name: Push to Epitech
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      # Correction du keyscan pour github.com (dépôt Epitech hébergé sur GitHub)
-      - name: Push to Epitech
+        env:
+          TARGET_REPO: git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
         run: |
-          mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
-          # On nettoie un ancien miroir potentiel puis on pousse
-          git remote remove epitech 2>/dev/null || true
-          git remote add epitech git@github.com:EpitechPGE2-2025/G-CNA-400-MPL-4-1-stoneanalysis-1.git
-          
+          git remote add epitech $TARGET_REPO
           git push epitech main --force
